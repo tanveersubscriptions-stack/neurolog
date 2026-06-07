@@ -83,15 +83,63 @@ document.querySelectorAll('.nav-link').forEach(link => {
   });
 });
 
+// ─── Helpers ───
+function getSleepMins() {
+  const mode = document.getElementById('sleep-mode-hm').classList.contains('active') ? 'hm' : 'times';
+  if (mode === 'hm') {
+    const h = parseInt(document.getElementById('sleep-h').value) || 0;
+    const m = parseInt(document.getElementById('sleep-m').value) || 0;
+    return h * 60 + m;
+  } else {
+    const bed = document.getElementById('sleep-bedtime').value;
+    const wake = document.getElementById('sleep-wakeup').value;
+    if (!bed || !wake) return 0;
+    let [bh, bm] = bed.split(':').map(Number);
+    let [wh, wm] = wake.split(':').map(Number);
+    let mins = (wh * 60 + wm) - (bh * 60 + bm);
+    if (mins <= 0) mins += 24 * 60;
+    return mins;
+  }
+}
+
+function getPhoneMins() {
+  const mode = document.getElementById('phone-mode-hm').classList.contains('active') ? 'hm' : 'times';
+  if (mode === 'hm') {
+    const h = parseInt(document.getElementById('phone-h').value) || 0;
+    const m = parseInt(document.getElementById('phone-m').value) || 0;
+    return h * 60 + m;
+  } else {
+    const start = document.getElementById('phone-start').value;
+    const end = document.getElementById('phone-end').value;
+    if (!start || !end) return 0;
+    let [sh, sm] = start.split(':').map(Number);
+    let [eh, em] = end.split(':').map(Number);
+    let mins = (eh * 60 + em) - (sh * 60 + sm);
+    if (mins <= 0) mins += 24 * 60;
+    return mins;
+  }
+}
+
+function minsToDisplay(mins) {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
 // ─── Save entry ───
 document.getElementById('save-btn').addEventListener('click', () => {
   const date = document.getElementById('entry-date').value;
   if (!date) return;
 
+  const sleepMins = getSleepMins();
+  const phoneMins = getPhoneMins();
+
   const entry = {
     date,
-    sleep: parseFloat(document.getElementById('sleep').value) || 0,
-    phone: parseFloat(document.getElementById('phone').value) || 0,
+    sleepMins,
+    phoneMins,
+    sleep: sleepMins / 60,
+    phone: phoneMins / 60,
     stress: parseInt(document.getElementById('stress').value),
     memory: parseInt(document.getElementById('memory').value),
     focus: parseInt(document.getElementById('focus').value),
@@ -128,9 +176,9 @@ function avg(arr) { return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.len
 
 function updateHeroStats() {
   document.getElementById('hs-days').textContent = entries.length;
-  const sleepAvg = avg(entries.map(e => e.sleep));
+  const sleepMinsAvg = avg(entries.map(e => e.sleepMins ?? Math.round(e.sleep * 60)));
   const memAvg = avg(entries.map(e => e.memory));
-  document.getElementById('hs-sleep').textContent = sleepAvg !== null ? sleepAvg.toFixed(1) + ' hrs' : '—';
+  document.getElementById('hs-sleep').textContent = sleepMinsAvg !== null ? minsToDisplay(Math.round(sleepMinsAvg)) : '—';
   document.getElementById('hs-memory').textContent = memAvg !== null ? memAvg.toFixed(1) + '/10' : '—';
 }
 
@@ -151,9 +199,12 @@ function renderData() {
   const focusAvg = avg(entries.map(e => e.focus));
   const stressAvg = avg(entries.map(e => e.stress));
 
+  const sleepAvgMins = avg(entries.map(e => e.sleepMins ?? Math.round(e.sleep * 60)));
+  const phoneAvgMins = avg(entries.map(e => e.phoneMins ?? Math.round(e.phone * 60)));
+
   bar.innerHTML = `
-    <div class="mcard"><div class="mcard-label">Avg sleep</div><div class="mcard-val">${sleepAvg.toFixed(1)}<span class="mcard-unit"> hrs</span></div></div>
-    <div class="mcard"><div class="mcard-label">Avg phone</div><div class="mcard-val">${phoneAvg.toFixed(1)}<span class="mcard-unit"> hrs</span></div></div>
+    <div class="mcard"><div class="mcard-label">Avg sleep</div><div class="mcard-val" style="font-size:1.4rem">${minsToDisplay(Math.round(sleepAvgMins))}</div></div>
+    <div class="mcard"><div class="mcard-label">Avg phone</div><div class="mcard-val" style="font-size:1.4rem">${minsToDisplay(Math.round(phoneAvgMins))}</div></div>
     <div class="mcard"><div class="mcard-label">Avg memory</div><div class="mcard-val">${memAvg.toFixed(1)}<span class="mcard-unit"> /10</span></div></div>
     <div class="mcard"><div class="mcard-label">Avg focus</div><div class="mcard-val">${focusAvg.toFixed(1)}<span class="mcard-unit"> /10</span></div></div>
     <div class="mcard"><div class="mcard-label">Avg stress</div><div class="mcard-val">${stressAvg.toFixed(1)}<span class="mcard-unit"> /10</span></div></div>
@@ -166,18 +217,21 @@ function renderData() {
     return `<span class="pill pill-low">Low</span>`;
   };
 
-  const rows = [...entries].reverse().map(e => `
+  const rows = [...entries].reverse().map(e => {
+    const sMins = e.sleepMins ?? Math.round(e.sleep * 60);
+    const pMins = e.phoneMins ?? Math.round(e.phone * 60);
+    return `
     <tr>
       <td>${e.date}</td>
-      <td>${e.sleep} hrs</td>
-      <td>${e.phone} hrs</td>
+      <td>${minsToDisplay(sMins)}</td>
+      <td>${minsToDisplay(pMins)}</td>
       <td>${stressPill(e.stress)}</td>
       <td>${e.memory}/10</td>
       <td>${e.focus}/10</td>
       <td style="color:var(--text3);font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.notes || '—'}</td>
       <td><button class="del-btn" data-date="${e.date}" title="Delete">×</button></td>
     </tr>
-  `).join('');
+  `}).join('');
 
   inner.innerHTML = `
     <table class="data-table">
