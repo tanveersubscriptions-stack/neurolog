@@ -58,14 +58,21 @@
             <div class="field-label-row">
               <label>Sleep last night</label>
               <div class="mode-toggle">
-                <button class="mode-btn active" id="sleep-mode-hrs" onclick="setSleepMode('hrs')">Hours</button>
+                <button class="mode-btn active" id="sleep-mode-hm" onclick="setSleepMode('hm')">Hrs &amp; mins</button>
                 <button class="mode-btn" id="sleep-mode-times" onclick="setSleepMode('times')">Bedtime / wake up</button>
               </div>
             </div>
-            <div id="sleep-hrs-input">
-              <div class="input-unit-wrap">
-                <input type="number" id="sleep" min="0" max="14" step="0.5" placeholder="7.5" />
-                <span class="unit">hrs</span>
+            <div id="sleep-hm-input">
+              <div class="hm-row">
+                <div class="input-unit-wrap hm-box">
+                  <input type="number" id="sleep-h" min="0" max="14" step="1" placeholder="7" oninput="syncSleepHM()" />
+                  <span class="unit">hrs</span>
+                </div>
+                <div class="input-unit-wrap hm-box">
+                  <input type="number" id="sleep-m" min="0" max="59" step="1" placeholder="30" oninput="syncSleepHM()" />
+                  <span class="unit">min</span>
+                </div>
+                <input type="hidden" id="sleep" value="" />
               </div>
             </div>
             <div id="sleep-times-input" style="display:none;">
@@ -89,14 +96,21 @@
             <div class="field-label-row">
               <label>Phone screen time</label>
               <div class="mode-toggle">
-                <button class="mode-btn active" id="phone-mode-hrs" onclick="setPhoneMode('hrs')">Hours</button>
-                <button class="mode-btn" id="phone-mode-times" onclick="setPhoneMode('times')">Start / end time</button>
+                <button class="mode-btn active" id="phone-mode-hm" onclick="setPhoneMode('hm')">Hrs &amp; mins</button>
+                <button class="mode-btn" id="phone-mode-times" onclick="setPhoneMode('times')">First pickup / last put down</button>
               </div>
             </div>
-            <div id="phone-hrs-input">
-              <div class="input-unit-wrap">
-                <input type="number" id="phone" min="0" max="18" step="0.5" placeholder="3.0" />
-                <span class="unit">hrs</span>
+            <div id="phone-hm-input">
+              <div class="hm-row">
+                <div class="input-unit-wrap hm-box">
+                  <input type="number" id="phone-h" min="0" max="18" step="1" placeholder="3" oninput="syncPhoneHM()" />
+                  <span class="unit">hrs</span>
+                </div>
+                <div class="input-unit-wrap hm-box">
+                  <input type="number" id="phone-m" min="0" max="59" step="1" placeholder="0" oninput="syncPhoneHM()" />
+                  <span class="unit">min</span>
+                </div>
+                <input type="hidden" id="phone" value="" />
               </div>
             </div>
             <div id="phone-times-input" style="display:none;">

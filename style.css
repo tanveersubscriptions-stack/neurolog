@@ -654,6 +654,9 @@ input[type="time"]:focus { border-color: var(--accent); }
   min-width: 80px;
 }
 
+.hm-row { display: flex; gap: 10px; align-items: center; }
+.hm-box { max-width: 120px; }
+
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
   nav { padding: 0 1rem; gap: 1rem; }

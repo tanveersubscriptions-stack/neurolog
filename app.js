@@ -1,10 +1,15 @@
 // ─── Sleep mode toggle ───
 function setSleepMode(mode) {
-  document.getElementById('sleep-hrs-input').style.display = mode === 'hrs' ? 'block' : 'none';
+  document.getElementById('sleep-hm-input').style.display = mode === 'hm' ? 'block' : 'none';
   document.getElementById('sleep-times-input').style.display = mode === 'times' ? 'block' : 'none';
-  document.getElementById('sleep-mode-hrs').classList.toggle('active', mode === 'hrs');
+  document.getElementById('sleep-mode-hm').classList.toggle('active', mode === 'hm');
   document.getElementById('sleep-mode-times').classList.toggle('active', mode === 'times');
-  if (mode === 'hrs') document.getElementById('sleep-calc-result').textContent = '—';
+}
+
+function syncSleepHM() {
+  const h = parseInt(document.getElementById('sleep-h').value) || 0;
+  const m = parseInt(document.getElementById('sleep-m').value) || 0;
+  document.getElementById('sleep').value = (h + m / 60).toFixed(2);
 }
 
 function calcSleepHours() {
@@ -14,19 +19,25 @@ function calcSleepHours() {
   let [bh, bm] = bed.split(':').map(Number);
   let [wh, wm] = wake.split(':').map(Number);
   let mins = (wh * 60 + wm) - (bh * 60 + bm);
-  if (mins <= 0) mins += 24 * 60; // crossed midnight
-  const hrs = (mins / 60).toFixed(1);
-  document.getElementById('sleep').value = hrs;
-  document.getElementById('sleep-calc-result').textContent = hrs + ' hrs';
+  if (mins <= 0) mins += 24 * 60;
+  const hrs = Math.floor(mins / 60);
+  const rem = mins % 60;
+  document.getElementById('sleep').value = (mins / 60).toFixed(2);
+  document.getElementById('sleep-calc-result').textContent = `${hrs}h ${rem}m`;
 }
 
 // ─── Phone mode toggle ───
 function setPhoneMode(mode) {
-  document.getElementById('phone-hrs-input').style.display = mode === 'hrs' ? 'block' : 'none';
+  document.getElementById('phone-hm-input').style.display = mode === 'hm' ? 'block' : 'none';
   document.getElementById('phone-times-input').style.display = mode === 'times' ? 'block' : 'none';
-  document.getElementById('phone-mode-hrs').classList.toggle('active', mode === 'hrs');
+  document.getElementById('phone-mode-hm').classList.toggle('active', mode === 'hm');
   document.getElementById('phone-mode-times').classList.toggle('active', mode === 'times');
-  if (mode === 'hrs') document.getElementById('phone-calc-result').textContent = '—';
+}
+
+function syncPhoneHM() {
+  const h = parseInt(document.getElementById('phone-h').value) || 0;
+  const m = parseInt(document.getElementById('phone-m').value) || 0;
+  document.getElementById('phone').value = (h + m / 60).toFixed(2);
 }
 
 function calcPhoneHours() {
@@ -37,9 +48,10 @@ function calcPhoneHours() {
   let [eh, em] = end.split(':').map(Number);
   let mins = (eh * 60 + em) - (sh * 60 + sm);
   if (mins <= 0) mins += 24 * 60;
-  const hrs = (mins / 60).toFixed(1);
-  document.getElementById('phone').value = hrs;
-  document.getElementById('phone-calc-result').textContent = hrs + ' hrs';
+  const hrs = Math.floor(mins / 60);
+  const rem = mins % 60;
+  document.getElementById('phone').value = (mins / 60).toFixed(2);
+  document.getElementById('phone-calc-result').textContent = `${hrs}h ${rem}m`;
 }
 
 // ─── State ───
