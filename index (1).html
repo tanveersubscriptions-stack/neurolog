@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuroLog — Behavior & Cognition Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="noise"></div>
+
+  <nav>
+    <div class="nav-logo">NeuroLog</div>
+    <div class="nav-links">
+      <a href="#" class="nav-link active" data-tab="log">Log</a>
+      <a href="#" class="nav-link" data-tab="data">Data</a>
+      <a href="#" class="nav-link" data-tab="patterns">Patterns</a>
+      <a href="#" class="nav-link" data-tab="research">Research</a>
+    </div>
+    <button class="export-btn" id="export-btn">Export CSV</button>
+  </nav>
+
+  <main>
+    <!-- HERO -->
+    <header class="hero">
+      <div class="hero-eyebrow">Personal neuroscience project</div>
+      <h1 class="hero-title">Track how your<br/><em>brain actually works</em></h1>
+      <p class="hero-sub">Log sleep, phone use, and stress daily. Surface patterns. Compare to published research. Build a real scientific project.</p>
+      <div class="hero-stats" id="hero-stats">
+        <div class="hstat"><span class="hstat-num" id="hs-days">0</span><span class="hstat-label">days logged</span></div>
+        <div class="hstat"><span class="hstat-num" id="hs-sleep">—</span><span class="hstat-label">avg sleep</span></div>
+        <div class="hstat"><span class="hstat-num" id="hs-memory">—</span><span class="hstat-label">avg memory</span></div>
+      </div>
+    </header>
+
+    <!-- LOG TAB -->
+    <section id="tab-log" class="tab-section active">
+      <div class="form-grid">
+        <div class="form-card main-form">
+          <div class="form-header">
+            <span class="form-label-tag">new entry</span>
+            <h2>Today's log</h2>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="entry-date">Date</label>
+              <input type="date" id="entry-date" />
+            </div>
+          </div>
+
+          <div class="divider-label">Sleep & Behavior</div>
+
+          <!-- Sleep field -->
+          <div class="field" style="margin-bottom: 1.25rem;">
+            <div class="field-label-row">
+              <label>Sleep last night</label>
+              <div class="mode-toggle">
+                <button class="mode-btn active" id="sleep-mode-hrs" onclick="setSleepMode('hrs')">Hours</button>
+                <button class="mode-btn" id="sleep-mode-times" onclick="setSleepMode('times')">Bedtime / wake up</button>
+              </div>
+            </div>
+            <div id="sleep-hrs-input">
+              <div class="input-unit-wrap">
+                <input type="number" id="sleep" min="0" max="14" step="0.5" placeholder="7.5" />
+                <span class="unit">hrs</span>
+              </div>
+            </div>
+            <div id="sleep-times-input" style="display:none;">
+              <div class="time-row">
+                <div class="time-field">
+                  <span class="time-label">Bedtime</span>
+                  <input type="time" id="sleep-bedtime" onchange="calcSleepHours()" />
+                </div>
+                <div class="time-sep">→</div>
+                <div class="time-field">
+                  <span class="time-label">Wake up</span>
+                  <input type="time" id="sleep-wakeup" onchange="calcSleepHours()" />
+                </div>
+                <div class="time-result" id="sleep-calc-result">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phone field -->
+          <div class="field" style="margin-bottom: 1.25rem;">
+            <div class="field-label-row">
+              <label>Phone screen time</label>
+              <div class="mode-toggle">
+                <button class="mode-btn active" id="phone-mode-hrs" onclick="setPhoneMode('hrs')">Hours</button>
+                <button class="mode-btn" id="phone-mode-times" onclick="setPhoneMode('times')">Start / end time</button>
+              </div>
+            </div>
+            <div id="phone-hrs-input">
+              <div class="input-unit-wrap">
+                <input type="number" id="phone" min="0" max="18" step="0.5" placeholder="3.0" />
+                <span class="unit">hrs</span>
+              </div>
+            </div>
+            <div id="phone-times-input" style="display:none;">
+              <div class="time-row">
+                <div class="time-field">
+                  <span class="time-label">First pickup</span>
+                  <input type="time" id="phone-start" onchange="calcPhoneHours()" />
+                </div>
+                <div class="time-sep">→</div>
+                <div class="time-field">
+                  <span class="time-label">Last put down</span>
+                  <input type="time" id="phone-end" onchange="calcPhoneHours()" />
+                </div>
+                <div class="time-result" id="phone-calc-result">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider-label">Cognitive Self-Assessment</div>
+          <div class="slider-group">
+            <div class="slider-field">
+              <div class="slider-top">
+                <label>Stress level</label>
+                <span class="slider-val" id="stress-out">5</span>
+              </div>
+              <input type="range" id="stress" min="1" max="10" value="5" class="styled-range stress-range" />
+              <div class="slider-ticks"><span>Low</span><span>High</span></div>
+            </div>
+            <div class="slider-field">
+              <div class="slider-top">
+                <label>Memory recall</label>
+                <span class="slider-val" id="memory-out">5</span>
+              </div>
+              <input type="range" id="memory" min="1" max="10" value="5" class="styled-range memory-range" />
+              <div class="slider-ticks"><span>Poor</span><span>Sharp</span></div>
+            </div>
+            <div class="slider-field">
+              <div class="slider-top">
+                <label>Focus / attention</label>
+                <span class="slider-val" id="focus-out">5</span>
+              </div>
+              <input type="range" id="focus" min="1" max="10" value="5" class="styled-range focus-range" />
+              <div class="slider-ticks"><span>Scattered</span><span>Locked in</span></div>
+            </div>
+          </div>
+
+          <div class="field" style="margin-top: 1.5rem;">
+            <label for="notes">Notes <span class="optional">(optional)</span></label>
+            <textarea id="notes" rows="3" placeholder="Anything notable — exam stress, poor sleep, caffeine, exercise..."></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button class="save-btn" id="save-btn">Save entry</button>
+            <span class="save-confirm" id="save-confirm">✓ Saved</span>
+          </div>
+        </div>
+
+        <div class="side-cards">
+          <div class="form-card why-card">
+            <div class="form-label-tag">the science</div>
+            <h3>Why these variables?</h3>
+            <div class="why-item">
+              <div class="why-dot sleep-dot"></div>
+              <div>
+                <strong>Sleep → Memory</strong>
+                <p>The hippocampus consolidates memories during slow-wave sleep. Less sleep = fewer memories transferred to long-term storage.</p>
+              </div>
+            </div>
+            <div class="why-item">
+              <div class="why-dot phone-dot"></div>
+              <div>
+                <strong>Phone → Attention</strong>
+                <p>Constant notifications fragment attentional networks in the prefrontal cortex, reducing sustained focus capacity.</p>
+              </div>
+            </div>
+            <div class="why-item">
+              <div class="why-dot stress-dot"></div>
+              <div>
+                <strong>Stress → Focus</strong>
+                <p>Elevated cortisol impairs PFC function — the region governing working memory and executive attention.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-card tip-card">
+            <div class="form-label-tag">tip</div>
+            <p>Log at the same time each day (e.g. before bed) for the most consistent data. Aim for at least <strong>4 weeks</strong> of entries to find meaningful patterns.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DATA TAB -->
+    <section id="tab-data" class="tab-section">
+      <div class="metrics-bar" id="metrics-bar"></div>
+      <div class="table-wrap">
+        <div id="data-table-inner"></div>
+      </div>
+    </section>
+
+    <!-- PATTERNS TAB -->
+    <section id="tab-patterns" class="tab-section">
+      <div class="charts-grid">
+        <div class="chart-card wide">
+          <div class="chart-card-header">
+            <h3>Variable trends over time</h3>
+            <div class="legend" id="trend-legend"></div>
+          </div>
+          <canvas id="trend-chart"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-header"><h3>Sleep vs memory recall</h3></div>
+          <canvas id="scatter-chart"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-header"><h3>Phone use vs focus</h3></div>
+          <canvas id="scatter2-chart"></canvas>
+        </div>
+      </div>
+      <div id="auto-insights" class="insights-row"></div>
+    </section>
+
+    <!-- RESEARCH TAB -->
+    <section id="tab-research" class="tab-section">
+      <div class="research-grid">
+        <div class="research-hero-card">
+          <div class="form-label-tag">your data vs the literature</div>
+          <h2>Compare your findings<br/>to published research</h2>
+          <p>After several weeks of logging, use this section to frame your personal data within established neuroscience findings — exactly what the project prompt asks for.</p>
+        </div>
+
+        <div class="research-card">
+          <div class="research-num">01</div>
+          <h4>Sleep & memory consolidation</h4>
+          <div class="research-cite">Walker et al., 2017 — <em>Why We Sleep</em></div>
+          <p>Adults sleeping fewer than 6 hours show up to a 40% reduction in memory consolidation. The hippocampus requires slow-wave sleep to replay and encode episodic memories.</p>
+          <div class="research-predict">
+            <span class="predict-label">Prediction for your data</span>
+            Sleep ≥ 7 hrs → memory recall score 7–10/10
+          </div>
+        </div>
+
+        <div class="research-card">
+          <div class="research-num">02</div>
+          <h4>Smartphone presence & cognitive capacity</h4>
+          <div class="research-cite">Ward et al., 2017 — <em>Journal of the Association for Consumer Research</em></div>
+          <p>The mere presence of a smartphone reduces available working memory. Daily use above 4 hours is associated with poorer sustained attention on standardized tasks.</p>
+          <div class="research-predict">
+            <span class="predict-label">Prediction for your data</span>
+            Phone &gt; 4 hrs → focus drops below 6/10
+          </div>
+        </div>
+
+        <div class="research-card">
+          <div class="research-num">03</div>
+          <h4>Stress, cortisol & prefrontal function</h4>
+          <div class="research-cite">Arnsten, 2015 — <em>Nature Reviews Neuroscience</em></div>
+          <p>Acute stress elevates norepinephrine and dopamine in the PFC, impairing working memory. Chronic cortisol exposure has been shown to physically reduce PFC grey matter density.</p>
+          <div class="research-predict">
+            <span class="predict-label">Prediction for your data</span>
+            Stress &gt; 7/10 → focus &lt; 5/10 on same day
+          </div>
+        </div>
+
+        <div class="research-card write-card">
+          <div class="research-num">04</div>
+          <h4>Writing your comparison</h4>
+          <p>After collecting data, look for: correlation direction (does more sleep track with better memory?), outliers (days that break the pattern — why?), and confounding variables (caffeine, exercise, illness).</p>
+          <p style="margin-top: 0.75rem;">Noting confounds in your write-up shows genuine scientific thinking — the kind that stands out in applications.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
